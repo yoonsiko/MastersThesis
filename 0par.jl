@@ -47,7 +47,7 @@ Base.@kwdef mutable struct cond_par
     L_T::Float64 = 313.0;
     V_T::Float64 = 313.0;
     ant_par::Vector = [6.20963, 2354.731, 7.559];
-    cond_P::Float64 = 10.0;
+    cond_P::Float64 = 15.0;
 end
 
 Base.@kwdef mutable struct psa_par

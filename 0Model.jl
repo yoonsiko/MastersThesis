@@ -64,7 +64,7 @@ for i = 1:5 # After all heavier carbons are removed
     @NLconstraint(m, m[:postATR_out_mol][i] - m[:itsr_in_mol][i] == 0)
     @NLconstraint(m, m[:itsr_out_mol][i] - m[:preCond_in_mol][i] == 0)
     @NLconstraint(m, m[:preCond_out_mol][i] - m[:cond_in_mol][i] == 0)
-    @NLconstraint(m, m[:cond_outProduct_mol][i] - m[:psa_in_mol][i] == 0)
+    @NLconstraint(m, m[:cond_vap_frac][i]*m[:cond_V] - m[:psa_in_mol][i] == 0)
 end
 # Same for the temperature
 @NLconstraint(m, m[:mix_out_T] - m[:prePR_in_T] == 0);
@@ -76,7 +76,7 @@ end
 @NLconstraint(m, m[:postATR_out_T] - m[:itsr_in_T] == 0);
 @NLconstraint(m, m[:itsr_out_T] - m[:preCond_in_T] == 0);
 @NLconstraint(m, m[:preCond_out_T] - m[:cond_in_T] == 0);
-@NLconstraint(m, m[:cond_outProduct_T] - m[:psa_in_T] == 0);
+@NLconstraint(m, m[:cond_V_T] - m[:psa_in_T] == 0);
 
 
 # Initial value conditions
