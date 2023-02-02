@@ -44,9 +44,10 @@ Base.@kwdef mutable struct preCond_par
 end
 
 Base.@kwdef mutable struct cond_par
-    outPurge_T::Float64 = 313.0;
-    outProduct_T::Float64 = 313.0;
-    splitratio::Vector = [1.0, 0.001, 1.0, 1.0, 1.0]; # Ideal split ratio, switch later
+    L_T::Float64 = 313.0;
+    V_T::Float64 = 313.0;
+    ant_par::Vector = [6.20963, 2354.731, 7.559];
+    cond_P::Float64 = 10.0;
 end
 
 Base.@kwdef mutable struct psa_par
