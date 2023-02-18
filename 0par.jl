@@ -1,6 +1,12 @@
 using JuMP, Ipopt, MathOptInterface
 
 # Parameters for initial flow values
+
+Base.@kwdef mutable struct init_par
+    init_stream::Float64 = 145.4;
+    init_comp::Vector = [0.7824, 0.0, 0.0, 0.0, 0.0134, 0.0610, 0.0670, 0.0248, 0.0141, 0.0367]
+end
+
 Base.@kwdef mutable struct mix_par
     in_T::Float64 = 311.00;
     out_T::Float64 = 381.41;
