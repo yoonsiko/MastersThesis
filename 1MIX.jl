@@ -16,6 +16,7 @@ function MIX_model(model, par)
   @variable(model, 273 <= mix_in_T, start = 311);
   @variable(model, 273 <= mix_out_T, start = 381.41);
   @variable(model, 273 <= H2O_T, start = 423.00);
+  @variable(model, 0 <= SC_ratio <= 5.0, start = 2.5);
 
   # Expressions
   mix_H_out = build_enthalpy(model, mix_out_T, par)
@@ -24,7 +25,7 @@ function MIX_model(model, par)
   mix_n_Carbon = @NLexpression(model, sum(mix_out_mol[i] for i=6:10)+mix_out_mol[1])
 
   # Mass balance
-  @NLconstraint(model, H2Ostream - par.mix.carbon_ratio*mix_n_Carbon == 0);
+  @NLconstraint(model, H2Ostream - SC_ratio*mix_n_Carbon == 0);
   @NLconstraint(model, mix_out_mol[1] - mix_in_mol[1] == 0)
   @NLconstraint(model, mix_out_mol[2] - mix_in_mol[2] - H2Ostream == 0)
   @NLconstraint(model, mix_out_mol[3] - mix_in_mol[3] == 0)
