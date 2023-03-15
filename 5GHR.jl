@@ -13,8 +13,8 @@ function GHR_model(model, par)
       set_start_value(ghr_out_mol[i] , ini_ghr_out[i]);
   end
 
-  @variable(model, 273 <= ghr_in_T, start = 753);
-  @variable(model, 923 <= ghr_out_T <= 1023, start = 973);
+  @variable(model, 559.2 <= ghr_in_T <= 659.2, start = 609.2);
+  @variable(model, 914.8 <= ghr_out_T <= 1014.8, start = 964.8);
 
   @variable(model, 0 <= ghr_Q, start = 34472000);
 
