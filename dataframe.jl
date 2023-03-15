@@ -60,9 +60,9 @@ function printTable(model)
 
     # Other variable table
     variable = ["prePR_Q","preGHR_Q","ghr_Q", "postATR_Q", "itsr_Q","preCond_Q",
-    "nO2", "F_H2", "F_H2_heat", "F_NG_Heat", "F_NG", "F_fluegas", "F_inj", "Profit [\$/h]"]#,"additional_Q"]
+    "nO2", "S/C_ratio",  "F_H2", "F_H2_heat", "F_NG_Heat", "F_NG", "F_fluegas", "F_inj", "Profit [\$/h]"]#,"additional_Q"]
     values = [value(model[:prePR_Q]),value(model[:preGHR_Q]),value(model[:ghr_Q]), value(model[:postATR_Q]),
-    value(model[:itsr_Q]),value(model[:preCond_Q]),value(model[:nO2]), value(model[:F_H2]),
+    value(model[:itsr_Q]),value(model[:preCond_Q]),value(model[:nO2]),value(model[:SC_ratio]) , value(model[:F_H2]),
     value(model[:F_H2_heat]),value(model[:F_NG_heat]),value(model[:F_NG]),value(model[:F_fluegas]),
     value(model[:F_inj]),objective_value(model)]#,value(model[:additional_Q])];
     otherdf = DataFrame(Variable = variable, Value = values);
