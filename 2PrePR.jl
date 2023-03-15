@@ -38,7 +38,7 @@ function prePR_model(model, par)
   @NLconstraint(model, sum(prePR_H_out[i]*prePR_out_mol[i] - prePR_H_in[i]*prePR_in_mol[i] for i=1:10) - prePR_Q==0);
 
   # Energy balance  - equipment specification
-  @NLconstraint(model, prePR_out_T - par.prePR.out_T == 0);
+  #@NLconstraint(model, prePR_out_T - par.prePR.out_T == 0);
 
   return model;
 end
