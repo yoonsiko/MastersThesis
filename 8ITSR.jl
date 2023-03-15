@@ -12,8 +12,8 @@ function ITSR_model(model, par)
       set_start_value(itsr_out_mol[i] , ini_itsr_out[i])
   end
 
-  @variable(model, 273 <= itsr_in_T, start = 600.00);
-  @variable(model, 273 <= itsr_out_T, start = 523.00);
+  @variable(model, 550 <= itsr_in_T <= 650, start = 600.00);
+  @variable(model, 473 <= itsr_out_T <= 573, start = 523.00);
 
   @variable(model, 0 >= itsr_Q, start = -5913000)
 
@@ -40,6 +40,6 @@ function ITSR_model(model, par)
   @NLconstraint(model, sum(itsr_H_out[i]*itsr_out_mol[i] - itsr_H_in[i]*itsr_in_mol[i] for i=1:5) - itsr_Q==0)
 
   # Energy balance - equipment specification
-  @NLconstraint(model, itsr_out_T - par.itsr.out_T == 0)
+  #@NLconstraint(model, itsr_out_T - par.itsr.out_T == 0)
   return model;
 end
