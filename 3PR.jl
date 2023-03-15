@@ -12,8 +12,8 @@ function PR_model(model, par)
     set_start_value(pr_out_mol[i] , ini_pr_out[i]);
   end
 
-  @variable(model, 273 <= pr_in_T, start = 693.00);
-  @variable(model, 273 <= pr_out_T, start = 630.52);
+  @variable(model, 643 <= pr_in_T <= 743, start = 693.00);
+  @variable(model, 609.2 <= pr_out_T <= 709.2, start = 659.2);
   
   # Expressions
   pr_ksi1 = @NLexpression(model, pr_in_mol[6]); # C2H6
