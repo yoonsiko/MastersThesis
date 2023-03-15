@@ -31,7 +31,7 @@ function preGHR_model(model, par)
   @NLconstraint(model, sum(preGHR_H_out[i]*preGHR_out_mol[i] - preGHR_H_in[i]*preGHR_in_mol[i] for i=1:5) - preGHR_Q==0);
 
   # Energy balance - equipment specification
-  @NLconstraint(model, preGHR_out_T - par.preGHR.out_T == 0);
+  #@NLconstraint(model, preGHR_out_T - par.preGHR.out_T == 0);
 
   return model;
 end
