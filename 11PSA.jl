@@ -30,7 +30,7 @@ function PSA_model(model, par)
   @NLconstraint(model, (1-par.psa.splitratio[4])*psa_in_mol[4] - psa_outPurge_mol[4] == 0);
   @NLconstraint(model, (1-par.psa.splitratio[5])*psa_in_mol[5] - psa_outPurge_mol[5] == 0);
 
-  @NLconstraint(model, psa_outPurge_T - par.psa.outPurge_T == 0);
-  @NLconstraint(model, psa_outProduct_T - par.psa.outProduct_T == 0);
+  @NLconstraint(model, psa_outPurge_T - psa_in_T == 0);
+  @NLconstraint(model, psa_outProduct_T - psa_in_T == 0);
   return model;
 end

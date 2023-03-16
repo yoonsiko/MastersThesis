@@ -13,7 +13,7 @@ function preCond_model(model, par)
   end
 
   @variable(model, 273 <= preCond_in_T, start = 523.00);
-  @variable(model, 273 <= preCond_out_T, start = 313.00);
+  @variable(model, 273 <= preCond_out_T <= 363, start = 313.00);
 
   preCond_H_out = build_enthalpy(model, preCond_out_T, par)
   preCond_H_in = build_enthalpy(model, preCond_in_T, par)
@@ -31,7 +31,7 @@ function preCond_model(model, par)
   @NLconstraint(model, sum(preCond_H_out[i]*preCond_out_mol[i] - preCond_H_in[i]*preCond_in_mol[i] for i=1:5) - preCond_Q==0);
 
   # Energy balance - equipment specification
-  @NLconstraint(model, preCond_out_T - par.preCond.out_T == 0);
+  #@NLconstraint(model, preCond_out_T - par.preCond.out_T == 0);
 
   return model;
 end

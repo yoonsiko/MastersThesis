@@ -43,8 +43,8 @@ function Cond_model(model, par)
   @NLconstraint(model, cond_L + cond_V - cond_F == 0);
 
   # Energy balance - Equipment specification
-  @NLconstraint(model, cond_V_T - par.cond.V_T == 0);
-  @NLconstraint(model, cond_L_T - par.cond.L_T == 0);
+  @NLconstraint(model, cond_V_T - cond_in_T == 0);
+  @NLconstraint(model, cond_L_T - cond_in_T == 0);
 
   return model;
 end
