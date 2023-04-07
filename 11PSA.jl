@@ -19,16 +19,10 @@ function PSA_model(model, par)
   
   # Constraints
   # Mass balance
-  @NLconstraint(model, par.psa.splitratio[1]*psa_in_mol[1] - psa_outProduct_mol[1] == 0);
-  @NLconstraint(model, par.psa.splitratio[2]*psa_in_mol[2] - psa_outProduct_mol[2] == 0);
-  @NLconstraint(model, par.psa.splitratio[3]*psa_in_mol[3] - psa_outProduct_mol[3] == 0);
-  @NLconstraint(model, par.psa.splitratio[4]*psa_in_mol[4] - psa_outProduct_mol[4] == 0);
-  @NLconstraint(model, par.psa.splitratio[5]*psa_in_mol[5] - psa_outProduct_mol[5] == 0);
-  @NLconstraint(model, (1-par.psa.splitratio[1])*psa_in_mol[1] - psa_outPurge_mol[1] == 0);
-  @NLconstraint(model, (1-par.psa.splitratio[2])*psa_in_mol[2] - psa_outPurge_mol[2] == 0);
-  @NLconstraint(model, (1-par.psa.splitratio[3])*psa_in_mol[3] - psa_outPurge_mol[3] == 0);
-  @NLconstraint(model, (1-par.psa.splitratio[4])*psa_in_mol[4] - psa_outPurge_mol[4] == 0);
-  @NLconstraint(model, (1-par.psa.splitratio[5])*psa_in_mol[5] - psa_outPurge_mol[5] == 0);
+  for i = 1:5
+    @NLconstraint(model, par.psa.splitratio[i]*psa_in_mol[i] - psa_outProduct_mol[i] == 0);
+    @NLconstraint(model, (1-par.psa.splitratio[i])*psa_in_mol[i] - psa_outPurge_mol[i] == 0);
+  end
 
   @NLconstraint(model, psa_outPurge_T - psa_in_T == 0);
   @NLconstraint(model, psa_outProduct_T - psa_in_T == 0);

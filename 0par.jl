@@ -59,5 +59,5 @@ end
 Base.@kwdef mutable struct psa_par
     outPurge_T::Float64 = 313.0;
     outProduct_T::Float64 = 313.0;
-    splitratio::Vector = [0.01, 0.01, 0.950, 0.01, 0.01]; # Almost ideal
+    splitratio::Vector = [0.001, 0.001, 0.97, 0.001, 0.001]; # Almost ideal
 end
