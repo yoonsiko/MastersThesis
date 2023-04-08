@@ -15,6 +15,7 @@ include("11PSA.jl")
 include("dataframe.jl")
 include("equilibrium.jl")
 include("compWork.jl")
+include("active.jl")
 
 const MOI = MathOptInterface
 C = 12.01;
@@ -139,6 +140,8 @@ println("Stream table"); show(streamdf, allrows=true);
 println("\n\nOther variables"); show(otherdf, allrows=true);
 println("\n\nMass table"); show(massdf, allrows=true);
 println("\n\nCompostion table"); show(compositiondf, allrows=true);
+println("");
+printActive(m);
 
 
 ######################### For calculating Hydrogen efficiency ###########################
