@@ -142,8 +142,3 @@ println("\n\nMass table"); show(massdf, allrows=true);
 println("\n\nCompostion table"); show(compositiondf, allrows=true);
 println("");
 printActive(m);
-
-
-######################### For calculating Hydrogen efficiency ###########################
-H2_in = 4 * value(m[:pr_out_mol][1]) + 2*value(m[:pr_out_mol][2]) + 2*value(m[:pr_out_mol][3])
-H2_eff = 2*value(m[:psa_outProduct_mol][3])/H2_in

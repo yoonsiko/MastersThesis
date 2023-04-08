@@ -18,7 +18,7 @@ function printActive(model)
         elseif variables[i] ≈ u_bound[i]
             println("The variable ", variable_name[i], " is at its upper bound of ",u_bound[i]);
         else 
-            println("The variable ",variable_name[i], " is not active, where the bounds are: ",l_bound[i]," ≤ ",variable_name[i], " ≤ ",u_bound[i]);
+            println("The variable ",variable_name[i], " is not active, with a value of ", variables[i], ", where the bounds are: ",l_bound[i]," ≤ ",variable_name[i], " ≤ ",u_bound[i]);
         end
     end
 end
