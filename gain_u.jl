@@ -95,22 +95,22 @@ function G_y(nominal, option, eps)
 
     if option == 1
         delta_u = eps*79.29706225438805;
-        @NLconstraint(m, m[:nO2]*(1+eps) == 0);
+        @NLconstraint(m, m[:nO2]-79.29706225438805*(1+eps) == 0);
     elseif option == 2
         delta_u = eps*644.5953165006283;
-        @NLconstraint(m, m[:pr_in_T]*(1+eps) == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1+eps) == 0);
     elseif option == 3
         delta_u = eps*1291.817465833818;
-        @NLconstraint(m, m[:atr_out_T]*(1+eps) == 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1+eps) == 0);
     elseif option == -1
         delta_u = -eps*79.29706225438805;
-        @NLconstraint(m, m[:nO2]*(1-eps) == 0);
+        @NLconstraint(m, m[:nO2]-79.29706225438805*(1-eps) == 0);
     elseif option == -2
         delta_u = -eps*644.5953165006283;
-        @NLconstraint(m, m[:pr_in_T]*(1-eps) == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1-eps) == 0);
     elseif option == -3
         delta_u = -eps*1291.817465833818;
-        @NLconstraint(m, m[:atr_out_T]*(1-eps) == 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1-eps) == 0);
     else 
         print("Option not valid")
     end
