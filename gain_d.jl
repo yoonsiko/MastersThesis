@@ -57,7 +57,7 @@ include("compWork.jl")
 include("active.jl")
 include("nominal_case.jl")
 
-eps = 0.1
+eps = 1e-5
 nominal_values = nominal();
 
 # 1: d1, NG_flow, +10%
