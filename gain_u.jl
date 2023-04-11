@@ -58,7 +58,7 @@ include("active.jl")
 include("nominal_case.jl")
 
 eps = 1e-5
-nominal_values = nominal();
+nominal_values, nominal_J = nominal();
 
 # 1: u1+h, n_O2
 # 2: u2+h, T_prePR
@@ -208,7 +208,7 @@ function G_y(nominal, option, eps)
         value(m[:prePR_Q]), value(m[:preGHR_Q]), value(m[:ghr_Q]), value(m[:postATR_Q]), value(m[:itsr_Q]), value(m[:preCond_Q]),
         value(m[:H2Ostream]), value(m[:F_H2]), value(m[:F_H2_heat]), value(m[:F_NG]), value(m[:F_NG_heat]), value(m[:F_fluegas]), value(m[:F_inj])
     ]
-    
+    nominal= nominal
     for i in eachindex(input_change)
         input_change[i] = (input_change[i]-nominal[i])/delta_u;
     end

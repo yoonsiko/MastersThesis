@@ -133,6 +133,7 @@ function nominal()
     @NLobjective(m, Max, m[:F_H2]*par.P_H2 - compWsum*par.elCost/1000); # 44*m[:F_inj]/1000*par.P_inj
     #@NLobjective(m, Max, m[:psa_outProduct_mol][3])
     optimize!(m)
+    nominal_J = objective_value(m)
 
     nominal_values = [
         value(m[:mix_in_mol][1]), value(m[:mix_in_mol][2]), value(m[:mix_in_mol][3]), value(m[:mix_in_mol][4]), value(m[:mix_in_mol][5]),
@@ -171,5 +172,5 @@ function nominal()
         value(m[:prePR_Q]), value(m[:preGHR_Q]), value(m[:ghr_Q]), value(m[:postATR_Q]), value(m[:itsr_Q]), value(m[:preCond_Q]),
         value(m[:H2Ostream]), value(m[:F_H2]), value(m[:F_H2_heat]), value(m[:F_NG]), value(m[:F_NG_heat]), value(m[:F_fluegas]), value(m[:F_inj])
     ]
-    return nominal_values
+    return nominal_values, nominal_J
 end

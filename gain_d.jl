@@ -58,7 +58,7 @@ include("active.jl")
 include("nominal_case.jl")
 
 eps = 1e-5
-nominal_values = nominal();
+nominal_values, nominal_J = nominal();
 
 # 1: d1+k, NG_flow
 # 2: d2+k, P_el
