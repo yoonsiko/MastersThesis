@@ -18,36 +18,19 @@ include("compWork.jl")
 include("active.jl")
 include("nominal_case.jl")
 
-# Options for finite_diff_1 (eps = 1e-5)
+# Options for finite diff (eps = 1e-5)
 # 1: u1+h, n_O2
 # 2: u2+h, T_prePR
 # 3: u3+h, T_ATR
-# 4: d1+h, NG flow
-# 5: d2+h, P_el
-# 6: d3+h, P_H2
+# 4: d1+k, NG flow
+# 5: d2+k, P_el
+# 6: d3+k, P_H2
 # -1: u1-h, n_O2
 # -2: u2-h, T_prePR
 # -3: u3-h, T_ATR
-# -4: d1-h, NG flow
-# -5: d2-h, P_el
-# -6: d3-h, P_H2
-
-# Options for finite_diff_2 (eps = 1e-5)
-# option_x (u)
-# # 1: u1+h, n_O2
-# 2: u2+h, T_prePR
-# 3: u3+h, T_ATR
-# -1: u1-h, n_O2
-# -2: u2-h, T_prePR
-# -3: u3-h, T_ATR
-#
-#option_y (d)
-# 1: d1+k, NG_flow
-# 2: d2+k, P_el
-# 3: d3+k, P_H2
-# -1: d1-k, NG_flow
-# -2: d2-k, P_el
-# -3: d3-k, P_H2
+# -4: d1-k, NG flow
+# -5: d2-k, P_el
+# -6: d3-k, P_H2
 
 eps = 1e-5
 
@@ -69,43 +52,43 @@ function finite_diff_1(option, eps)
     preCond_model(m, par);
     Cond_model(m, par);
     PSA_model(m, par);
-    delta_u = 0;
-    delta_d = 0;
+    h = 0;
+    k = 0;
     if option == 1 # u1 + h
-        delta_u = eps*79.29706225438805; 
+        h = eps*79.29706225438805; 
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1+eps) == 0);
     elseif option == 2 # u2 + h 
-        delta_u = eps*644.5953165006283;
+        h = eps*644.5953165006283;
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1+eps) == 0);
     elseif option == 3 # u3 + h
-        delta_u = eps*1291.817465833818; 
+        h = eps*1291.817465833818; 
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1+eps) == 0);
     elseif option == 4 # d1 + h
-        delta_d = eps*par.init.init_stream;
+        k = eps*par.init.init_stream;
         par.init.init_stream = par.init.init_stream*(1+eps);
     elseif option == 5 # d2 + h
-        delta_d = eps*par.elCost;
+        k = eps*par.elCost;
         par.elCost = par.elCost*(1+eps);
     elseif option == 6 # d3 + h
-        delta_d = eps*par.P_H2;
+        k = eps*par.P_H2;
         par.P_H2 = par.P_H2*(1+eps);
     elseif option == -1 # u1 - h
-        delta_u = -eps*79.29706225438805;
+        h = eps*79.29706225438805;
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1-eps) == 0);
     elseif option == -2 # u2 - h
-        delta_u = -eps*644.5953165006283;
+        h = eps*644.5953165006283;
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1-eps) == 0);
     elseif option == -3 # u3 - h
-        delta_u = -eps*1291.817465833818;
+        h = eps*1291.817465833818;
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1-eps) == 0);
     elseif option == -4 # d1 - h
-        delta_d = -eps*par.init.init_stream;
+        k = -eps*par.init.init_stream;
         par.init.init_stream = par.init.init_stream*(1-eps);
     elseif option == -5 # d2 - h
-        delta_d = -eps*par.elCost;
+        k = -eps*par.elCost;
         par.elCost = par.elCost*(1-eps);
     elseif option == -6 # d3 - h
-        delta_d = -eps*par.P_H2;
+        k = -eps*par.P_H2;
         par.P_H2 = par.P_H2*(1-eps);
     else 
         print("Option not valid")
@@ -175,7 +158,7 @@ function finite_diff_1(option, eps)
 
     optimize!(m)
     f = objective_value(m)
-    return f, delta_u, delta_d
+    return f, h, k
 end
 
 function finite_diff_2(option_x, option_y, eps)
@@ -196,47 +179,84 @@ function finite_diff_2(option_x, option_y, eps)
     preCond_model(m, par);
     Cond_model(m, par);
     PSA_model(m, par);
-    delta_u = 0;
-    delta_d = 0;
-    if option_x == 1 # u1+h
-        delta_u = eps*79.29706225438805; 
+    h = 0;
+    k = 0;
+    
+    if option_x == 1 # u1 + h
+        h = eps*79.29706225438805; 
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1+eps) == 0);
-    elseif option_x == 2 # u2+h
-        delta_u = eps*79.29706225438805; 
-        @NLconstraint(m, m[:nO2]-79.29706225438805*(1+eps) == 0);
-    elseif option_x == 3 # u3+h
-        delta_u = eps*79.29706225438805; 
-        @NLconstraint(m, m[:nO2]-79.29706225438805*(1+eps) == 0);
-    elseif option_x == -1 # u1-h
-        delta_u = -eps*79.29706225438805; 
+    elseif option_x == 2 # u2 + h 
+        h = eps*644.5953165006283;
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1+eps) == 0);
+    elseif option_x == 3 # u3 + h
+        h = eps*1291.817465833818; 
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1+eps) == 0);
+    elseif option_x == 4 # d1 + k
+        h = eps*par.init.init_stream;
+        par.init.init_stream = par.init.init_stream*(1+eps);
+    elseif option_x == 5 # d2 + k
+        h = eps*par.elCost;
+        par.elCost = par.elCost*(1+eps);
+    elseif option_x == 6 # d3 + k
+        h = eps*par.P_H2;
+        par.P_H2 = par.P_H2*(1+eps);
+    elseif option_x == -1 # u1 - h
+        h = eps*79.29706225438805;
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1-eps) == 0);
-    elseif option_x == -2 # u2-h
-        delta_u = -eps*79.29706225438805; 
-        @NLconstraint(m, m[:nO2]-79.29706225438805*(1-eps) == 0);
-    elseif option_x == -3 # u3-h
-        delta_u = -eps*79.29706225438805; 
-        @NLconstraint(m, m[:nO2]-79.29706225438805*(1-eps) == 0);
+    elseif option_x == -2 # u2 - h
+        h = eps*644.5953165006283;
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1-eps) == 0);
+    elseif option_x == -3 # u3 - h
+        h = eps*1291.817465833818;
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1-eps) == 0);
+    elseif option_x == -4 # d1 - k
+        h = -eps*par.init.init_stream;
+        par.init.init_stream = par.init.init_stream*(1-eps);
+    elseif option_x == -5 # d2 - k
+        h = -eps*par.elCost;
+        par.elCost = par.elCost*(1-eps);
+    elseif option_x == -6 # d3 - k
+        h = -eps*par.P_H2;
+        par.P_H2 = par.P_H2*(1-eps);
     else 
         print("Option not valid")
-    end    
+    end
 
-    if option_y == 1 # d1+k
-        delta_d = eps*par.init.init_stream;
+    if option_y == 1 # u1 + h
+        k = eps*79.29706225438805; 
+        @NLconstraint(m, m[:nO2]-79.29706225438805*(1+eps) == 0);
+    elseif option_y == 2 # u2 + h 
+        k = eps*644.5953165006283;
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1+eps) == 0);
+    elseif option_y == 3 # u3 + h
+        k = eps*1291.817465833818; 
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1+eps) == 0);
+    elseif option_y == 4 # d1 + k
+        k = eps*par.init.init_stream;
         par.init.init_stream = par.init.init_stream*(1+eps);
-    elseif option_y == 2 # d2+k
-        delta_d = eps*par.elCost;
+    elseif option_y == 5 # d2 + k
+        k = eps*par.elCost;
         par.elCost = par.elCost*(1+eps);
-    elseif option_y == 3 # d3+k
-        delta_d = eps*par.P_H2;
+    elseif option_y == 6 # d3 + k
+        k = eps*par.P_H2;
         par.P_H2 = par.P_H2*(1+eps);
-    elseif option_y == -1 # d1-k
-        delta_d = -eps*par.init.init_stream;
+    elseif option_y == -1 # u1 - h
+        k = eps*79.29706225438805;
+        @NLconstraint(m, m[:nO2]-79.29706225438805*(1-eps) == 0);
+    elseif option_y == -2 # u2 - h
+        k = eps*644.5953165006283;
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1-eps) == 0);
+    elseif option_y == -3 # u3 - h
+        k = eps*1291.817465833818;
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1-eps) == 0);
+    elseif option_y == -4 # d1 - k
+        k = -eps*par.init.init_stream;
         par.init.init_stream = par.init.init_stream*(1-eps);
-    elseif option_y == -2 # d2-k
-        delta_d = -eps*par.elCost;
+    elseif option_y == -5 # d2 - k
+        k = -eps*par.elCost;
         par.elCost = par.elCost*(1-eps);
-    elseif option_y == -3 # d3-k
-        delta_d = -eps*par.P_H2;
+    elseif option_y == -6 # d3 - k
+        k = -eps*par.P_H2;
         par.P_H2 = par.P_H2*(1-eps);
     else 
         print("Option not valid")
@@ -306,5 +326,5 @@ function finite_diff_2(option_x, option_y, eps)
 
     optimize!(m)
     f = objective_value(m)
-    return f, delta_u, delta_d
+    return f, h, k
 end
