@@ -82,13 +82,13 @@ function finite_diff_1(option, eps)
         h = eps*1291.817465833818;
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1-eps) == 0);
     elseif option == -4 # d1 - h
-        k = -eps*par.init.init_stream;
+        k = eps*par.init.init_stream;
         par.init.init_stream = par.init.init_stream*(1-eps);
     elseif option == -5 # d2 - h
-        k = -eps*par.elCost;
+        k = eps*par.elCost;
         par.elCost = par.elCost*(1-eps);
     elseif option == -6 # d3 - h
-        k = -eps*par.P_H2;
+        k = eps*par.P_H2;
         par.P_H2 = par.P_H2*(1-eps);
     else 
         print("Option not valid")
@@ -210,13 +210,13 @@ function finite_diff_2(option_x, option_y, eps)
         h = eps*1291.817465833818;
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1-eps) == 0);
     elseif option_x == -4 # d1 - k
-        h = -eps*par.init.init_stream;
+        h = eps*par.init.init_stream;
         par.init.init_stream = par.init.init_stream*(1-eps);
     elseif option_x == -5 # d2 - k
-        h = -eps*par.elCost;
+        h = eps*par.elCost;
         par.elCost = par.elCost*(1-eps);
     elseif option_x == -6 # d3 - k
-        h = -eps*par.P_H2;
+        h = eps*par.P_H2;
         par.P_H2 = par.P_H2*(1-eps);
     else 
         print("Option not valid")
@@ -250,13 +250,13 @@ function finite_diff_2(option_x, option_y, eps)
         k = eps*1291.817465833818;
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1-eps) == 0);
     elseif option_y == -4 # d1 - k
-        k = -eps*par.init.init_stream;
+        k = eps*par.init.init_stream;
         par.init.init_stream = par.init.init_stream*(1-eps);
     elseif option_y == -5 # d2 - k
-        k = -eps*par.elCost;
+        k = eps*par.elCost;
         par.elCost = par.elCost*(1-eps);
     elseif option_y == -6 # d3 - k
-        k = -eps*par.P_H2;
+        k = eps*par.P_H2;
         par.P_H2 = par.P_H2*(1-eps);
     else 
         print("Option not valid")
