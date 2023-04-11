@@ -60,12 +60,12 @@ include("nominal_case.jl")
 eps = 1e-5
 nominal_values = nominal();
 
-# 1: d1, NG_flow, +10%
-# 2: d2, P_el, +10%
-# 3: d3, P_H2, +10%
-# -1: d1, NG_flow, -10%
-# -2: d2, P_el, -10%
-# -3: d3, P_H2. -10%
+# 1: d1+k, NG_flow
+# 2: d2+k, P_el
+# 3: d3+k, P_H2
+# -1: d1+h, NG_flow
+# -2: d2+h, P_el
+# -3: d3+h, P_H2
 function G_yd(nominal, option, eps)
 
     par = _par();

@@ -60,12 +60,12 @@ include("nominal_case.jl")
 eps = 1e-5
 nominal_values = nominal();
 
-# 1: u1, n_O2, +1e-5
-# 2: u2, T_prePR, +1e-5
-# 3: u3, T_ATR, +1e-5
-# -1: u1, n_O2, -1e-5
-# -2: u2, T_prePR, -1e-5
-# -3: u3, T_ATR. -1e-5
+# 1: u1+h, n_O2
+# 2: u2+h, T_prePR
+# 3: u3+h, T_ATR
+# -1: u1-h, n_O2
+# -2: u2-h, T_prePR
+# -3: u3-h, T_ATR
 function G_y(nominal, option, eps)
 
     par = _par();
