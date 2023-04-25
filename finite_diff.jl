@@ -57,11 +57,17 @@ function finite_diff_1(option, eps)
     if option == 1 # u1 + h
         h = eps*79.29706225438805; 
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1+eps) == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == 2 # u2 + h 
         h = eps*644.5953165006283;
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1+eps) == 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == 3 # u3 + h
         h = eps*1291.817465833818; 
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1+eps) == 0);
     elseif option == 4 # d1 + h
         k = eps*par.init.init_stream;
@@ -75,11 +81,17 @@ function finite_diff_1(option, eps)
     elseif option == -1 # u1 - h
         h = eps*79.29706225438805;
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1-eps) == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == -2 # u2 - h
         h = eps*644.5953165006283;
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1-eps) == 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == -3 # u3 - h
         h = eps*1291.817465833818;
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1-eps) == 0);
     elseif option == -4 # d1 - h
         k = eps*par.init.init_stream;
@@ -185,11 +197,17 @@ function finite_diff_2(option_x, option_y, eps)
     if option_x == 1 # u1 + h
         h = eps*79.29706225438805; 
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1+eps) == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option_x == 2 # u2 + h 
         h = eps*644.5953165006283;
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1+eps) == 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option_x == 3 # u3 + h
         h = eps*1291.817465833818; 
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1+eps) == 0);
     elseif option_x == 4 # d1 + k
         h = eps*par.init.init_stream;

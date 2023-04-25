@@ -63,9 +63,9 @@ nominal_values, nominal_J = nominal();
 # 1: d1+k, NG_flow
 # 2: d2+k, P_el
 # 3: d3+k, P_H2
-# -1: d1+h, NG_flow
-# -2: d2+h, P_el
-# -3: d3+h, P_H2
+# -1: d1-k, NG_flow
+# -2: d-k, P_el
+# -3: d3-k, P_H2
 function G_yd(nominal, option, eps)
 
     par = _par();
