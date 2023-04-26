@@ -233,6 +233,15 @@ function printG_yd()
                      ∂y∂d_3_plus = dydd3_plus,
                      ∂y∂d_3_minus = dydd3_minus)
 end
+function matrix_Gyd(nominal_values, eps)
+    matrix = transpose([G_yd(nominal_values, 1, eps),
+    G_yd(nominal_values, 2, eps),
+    G_yd(nominal_values, 3, eps),
+    G_yd(nominal_values, -1, eps),
+    G_yd(nominal_values, -2, eps),
+    G_yd(nominal_values, -3, eps)]);
+    return matrix
+end
 
 G_yd_table = printG_yd()
 println("G_yd"); show(G_yd_table, allrows=true);

@@ -245,5 +245,15 @@ function printG_y()
                      ∂y∂u_3_minus = dydu3_minus)
 end
 
+function matrix_Gy(nominal_values, eps)
+    matrix = transpose([G_y(nominal_values, 1, eps),
+    G_y(nominal_values, 2, eps),
+    G_y(nominal_values, 3, eps),
+    G_y(nominal_values, -1, eps),
+    G_y(nominal_values, -2, eps),
+    G_y(nominal_values, -3, eps)]);
+    return matrix
+end
+
 G_y_table = printG_y()
 println("G_y"); show(G_y_table, allrows=true);
