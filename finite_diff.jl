@@ -37,7 +37,8 @@ eps = 1e-5
 function finite_diff_1(option, eps)
     par = _par();
     optimizer = optimizer_with_attributes(Ipopt.Optimizer,
-             "tol" => 1e-6, "constr_viol_tol" => 1e-8)
+             "tol" => 1e-6, "constr_viol_tol" => 1e-8,
+             "print_level" => 0)
     m = Model(optimizer);
 
     ###### Assembling the submodels to a larger model #######
@@ -72,12 +73,21 @@ function finite_diff_1(option, eps)
     elseif option == 4 # d1 + h
         k = eps*par.init.init_stream;
         par.init.init_stream = par.init.init_stream*(1+eps);
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == 5 # d2 + h
         k = eps*par.elCost;
         par.elCost = par.elCost*(1+eps);
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == 6 # d3 + h
         k = eps*par.P_H2;
         par.P_H2 = par.P_H2*(1+eps);
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == -1 # u1 - h
         h = eps*79.29706225438805;
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1-eps) == 0);
@@ -96,12 +106,21 @@ function finite_diff_1(option, eps)
     elseif option == -4 # d1 - h
         k = eps*par.init.init_stream;
         par.init.init_stream = par.init.init_stream*(1-eps);
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == -5 # d2 - h
         k = eps*par.elCost;
         par.elCost = par.elCost*(1-eps);
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == -6 # d3 - h
         k = eps*par.P_H2;
         par.P_H2 = par.P_H2*(1-eps);
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     else 
         print("Option not valid")
     end
@@ -169,14 +188,17 @@ function finite_diff_1(option, eps)
     @NLobjective(m, Max, m[:F_H2]*par.P_H2 - compWsum*par.elCost/1000);
 
     optimize!(m)
-    f = objective_value(m)
-    return f, h, k
+    if termination_status(m) == LOCALLY_SOLVED || termination_status(m) == OPTIMAL || termination_status(m) == ALMOST_LOCALLY_SOLVED
+        return objective_value(m), h, k
+    else
+        return Inf, h, k  
 end
 
-function finite_diff_2(option_x, option_y, eps)
+function finite_diff_2(option_x, option_y, eps;m=0.)
     par = _par();
     optimizer = optimizer_with_attributes(Ipopt.Optimizer,
-             "tol" => 1e-6, "constr_viol_tol" => 1e-8)
+             "tol" => 1e-6, "constr_viol_tol" => 1e-8
+             ,"print_level" => 0)
     m = Model(optimizer);
 
     ###### Assembling the submodels to a larger model #######
@@ -197,17 +219,11 @@ function finite_diff_2(option_x, option_y, eps)
     if option_x == 1 # u1 + h
         h = eps*79.29706225438805; 
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1+eps) == 0);
-        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
-        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option_x == 2 # u2 + h 
         h = eps*644.5953165006283;
-        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1+eps) == 0);
-        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option_x == 3 # u3 + h
         h = eps*1291.817465833818; 
-        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
-        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1+eps) == 0);
     elseif option_x == 4 # d1 + k
         h = eps*par.init.init_stream;
@@ -221,17 +237,11 @@ function finite_diff_2(option_x, option_y, eps)
     elseif option_x == -1 # u1 - h
         h = eps*79.29706225438805;
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1-eps) == 0);
-        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
-        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option_x == -2 # u2 - h
         h = eps*644.5953165006283;
-        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1-eps) == 0);
-        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option_x == -3 # u3 - h
         h = eps*1291.817465833818;
-        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
-        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1-eps) == 0);
     elseif option_x == -4 # d1 - k
         h = eps*par.init.init_stream;
@@ -249,17 +259,11 @@ function finite_diff_2(option_x, option_y, eps)
     if option_y == 1 # u1 + h
         k = eps*79.29706225438805; 
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1+eps) == 0);
-        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
-        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option_y == 2 # u2 + h 
         k = eps*644.5953165006283;
-        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1+eps) == 0);
-        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option_y == 3 # u3 + h
         k = eps*1291.817465833818; 
-        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
-        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1+eps) == 0);
     elseif option_y == 4 # d1 + k
         k = eps*par.init.init_stream;
@@ -273,17 +277,11 @@ function finite_diff_2(option_x, option_y, eps)
     elseif option_y == -1 # u1 - h
         k = eps*79.29706225438805;
         @NLconstraint(m, m[:nO2]-79.29706225438805*(1-eps) == 0);
-        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
-        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option_y == -2 # u2 - h
         k = eps*644.5953165006283;
-        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283*(1-eps) == 0);
-        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option_y == -3 # u3 - h
         k = eps*1291.817465833818;
-        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
-        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818*(1-eps) == 0);
     elseif option_y == -4 # d1 - k
         k = eps*par.init.init_stream;
@@ -296,6 +294,15 @@ function finite_diff_2(option_x, option_y, eps)
         par.P_H2 = par.P_H2*(1-eps);
     else 
         print("Option not valid")
+    end
+    if abs(option_y) != 1 && abs(option_x) !=1
+        @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
+    end
+    if abs(option_y) != 2 && abs(option_x) !=2
+        @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
+    end
+    if abs(option_y) != 3 && abs(option_x) !=3
+        @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     end
 
     @variable(m, 0 <= F_H2, start = 500); # H2 product that is being sold in the obj function
@@ -361,6 +368,11 @@ function finite_diff_2(option_x, option_y, eps)
     @NLobjective(m, Max, m[:F_H2]*par.P_H2 - compWsum*par.elCost/1000);
 
     optimize!(m)
-    f = objective_value(m)
-    return f, h, k
+    
+    if termination_status(m) == LOCALLY_SOLVED || termination_status(m) == OPTIMAL || termination_status(m) == ALMOST_LOCALLY_SOLVED
+        return objective_value(m), h, k
+    else
+        return Inf, h, k       
+    end
+    #return f, h, k
 end
