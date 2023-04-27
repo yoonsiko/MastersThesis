@@ -70,7 +70,8 @@ function G_yd(nominal, option, eps)
 
     par = _par();
     optimizer = optimizer_with_attributes(Ipopt.Optimizer,
-             "tol" => 1e-6, "constr_viol_tol" => 1e-8)
+             "tol" => 1e-6, "constr_viol_tol" => 1e-8,
+             "print_level" => 0)
     m = Model(optimizer);
 
     ###### Assembling the submodels to a larger model #######
@@ -107,6 +108,9 @@ function G_yd(nominal, option, eps)
     else 
         print("Option not valid")
     end
+    @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
+    @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
+    @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
 
     @variable(m, 0 <= F_H2, start = 500); # H2 product that is being sold in the obj function
     @variable(m, 0 <= F_H2_heat, start = 1); # H2 from the product stream that is being used to heat up the process

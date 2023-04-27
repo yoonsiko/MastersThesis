@@ -49,7 +49,7 @@ end
 ################# Initializing the model ################
 par = _par();
 optimizer = optimizer_with_attributes(Ipopt.Optimizer,
-             "tol" => 1e-6, "constr_viol_tol" => 1e-8)
+             "tol" => 1e-6, "constr_viol_tol" => 1e-8, "print_level" => 0)
 m = Model(optimizer);
 
 ###### Assembling the submodels to a larger model #######
