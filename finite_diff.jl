@@ -192,6 +192,7 @@ function finite_diff_1(option, eps)
         return objective_value(m), h, k
     else
         return Inf, h, k  
+    end
 end
 
 function finite_diff_2(option_x, option_y, eps;m=0.)
