@@ -247,5 +247,5 @@ function matrix_Gyd(nominal_values, eps)
     return matrix
 end
 
-G_yd_table = printG_yd()
-println("G_yd"); show(G_yd_table, allrows=true);
+#G_yd_table = printG_yd()
+#println("G_yd"); show(G_yd_table, allrows=true);

@@ -256,5 +256,5 @@ function matrix_Gy(nominal_values, eps)
     return matrix
 end
 
-G_y_table = printG_y()
-println("G_y"); show(G_y_table, allrows=true);
+#G_y_table = printG_y()
+#println("G_y"); show(G_y_table, allrows=true);
