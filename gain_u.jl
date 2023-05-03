@@ -37,7 +37,7 @@ variable_name = [
 ]
 # Variables that are removed = S/C, nO2, T_prePR, T_PR, T_ATR, T_postATR, T_ITSR, T_cond
 
-using JuMP, Ipopt, MathOptInterface, DataFrames, PrettyTables
+using JuMP, Ipopt, MathOptInterface, DataFrames, PrettyTables, XLSX
 include("enthalpy.jl")
 include("0par.jl")
 include("1MIX.jl")
@@ -238,21 +238,23 @@ dydu3_minus = G_y(nominal_values, -3, eps)
 function printG_y()
     return DataFrame(Variable = variable_name,
                      Nominal = nominal_values,
-                     ∂y∂u_1_plus = dydu1_plus,
-                     ∂y∂u_1_minus = dydu1_minus,
-                     ∂y∂u_2_plus = dydu2_plus,
-                     ∂y∂u_2_minus = dydu2_minus,
-                     ∂y∂u_3_plus = dydu3_plus,
-                     ∂y∂u_3_minus = dydu3_minus)
+                     ∂y∂u_1 = dydu1_plus,
+                     ∂y∂u_2 = dydu2_plus,
+                     ∂y∂u_3 = dydu3_plus)
 end
 
 function matrix_Gy(nominal_values, eps)
-    matrix = transpose([G_y(nominal_values, 1, eps),
-    G_y(nominal_values, 2, eps),
-    G_y(nominal_values, 3, eps),
-    G_y(nominal_values, -1, eps),
-    G_y(nominal_values, -2, eps),
-    G_y(nominal_values, -3, eps)]);
+    matrix = zeros(3,184);
+    for i in 1:3
+        if i == 1
+            vector = G_y(nominal_values, 1, eps)
+        elseif i == 2
+            vector = G_y(nominal_values, 2, eps)
+        else
+            vector = G_y(nominal_values, 3, eps)
+        end
+        matrix[i,:] = vector'
+    end 
     return matrix
 end
 

@@ -223,27 +223,26 @@ end
 dydd1_plus = G_yd(nominal_values, 1, eps)
 dydd2_plus = G_yd(nominal_values, 2, eps)
 dydd3_plus = G_yd(nominal_values, 3, eps)
-dydd1_minus = G_yd(nominal_values, -1, eps)
-dydd2_minus = G_yd(nominal_values, -2, eps)
-dydd3_minus = G_yd(nominal_values, -3, eps)
 
 function printG_yd()
     return DataFrame(Variable = variable_name,
                      Nominal = nominal_values,
                      ∂y∂d_1_plus = dydd1_plus,
-                     ∂y∂d_1_minus = dydd1_minus,
                      ∂y∂d_2_plus = dydd2_plus,
-                     ∂y∂d_2_minus = dydd2_minus,
-                     ∂y∂d_3_plus = dydd3_plus,
-                     ∂y∂d_3_minus = dydd3_minus)
+                     ∂y∂d_3_plus = dydd3_plus)
 end
 function matrix_Gyd(nominal_values, eps)
-    matrix = transpose([G_yd(nominal_values, 1, eps),
-    G_yd(nominal_values, 2, eps),
-    G_yd(nominal_values, 3, eps),
-    G_yd(nominal_values, -1, eps),
-    G_yd(nominal_values, -2, eps),
-    G_yd(nominal_values, -3, eps)]);
+    matrix = zeros(3,184);
+    for i in 1:3
+        if i == 1
+            vector = G_yd(nominal_values, 1, eps)
+        elseif i == 2
+            vector = G_yd(nominal_values, 2, eps)
+        else
+            vector = G_yd(nominal_values, 3, eps)
+        end
+        matrix[i,:] = vector'
+    end 
     return matrix
 end
 
