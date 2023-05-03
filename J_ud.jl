@@ -17,7 +17,7 @@ include("nominal_case.jl")
 
 nominal_states, nom_f = nominal();
 eps = 1e-5
-function J_ud()
+function J_ud(eps)
     J_ud = zeros(3,3);
     for i=1:3
         for j=4:6
