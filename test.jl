@@ -294,7 +294,7 @@ function test_matrix(option)
     input_list = [79.29706225438805,644.5953165006283,1291.817465833818]
     par = _par();
     optimizer = optimizer_with_attributes(Ipopt.Optimizer,
-             "tol" => 1e-6, "constr_viol_tol" => 1e-8,
+             "tol" => 1e-10, "constr_viol_tol" => 1e-10,
              "print_level" => 0)
     m = Model(optimizer);
 
@@ -399,9 +399,8 @@ function test_matrix(option)
     #@NLobjective(m, Max, m[:psa_outProduct_mol][3])
     optimize!(m);
 
-    J_uu_matrix = J_uu();
-    J_ud_matrix = J_ud();
-    rhs = zeros(length(delta_d));
+    J_uu_matrix = J_uu(5e-2);
+    J_ud_matrix = J_ud(5e-2);
     rhs = inv(J_uu_matrix)*J_ud_matrix*(delta_d);
     lhs = [value(m[:nO2])-79.29706225438805,
         value(m[:pr_in_T])-644.5953165006283,
@@ -412,13 +411,10 @@ function test_matrix(option)
     for i in eachindex(lhs)
         diff[i] = lhs[i] - rhs[i];
     end
-    println("lhs:", lhs);
-    println("rhs:", rhs);
-    println("diff:", diff);
     return DataFrame(Variable = input_name,
                     lhs = lhs,
                     rhs = rhs,
                     diff = diff);
 end
 
-show(test_matrix(-3), allrows=true)
+#show(test_matrix(1), allrows=true)
