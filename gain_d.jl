@@ -37,7 +37,7 @@ variable_name = [
 ]
 # Variables that are removed = S/C, nO2, T_prePR, T_PR, T_ATR, T_postATR, T_ITSR, T_cond
 
-using JuMP, Ipopt, MathOptInterface, DataFrames, PrettyTables
+using JuMP, Ipopt, MathOptInterface, DataFrames, PrettyTables, XLSX
 include("enthalpy.jl")
 include("0par.jl")
 include("1MIX.jl")
@@ -245,6 +245,8 @@ function matrix_Gyd(nominal_values, eps)
     end 
     return matrix
 end
+
+XLSX.writetable("data/G_yd.xlsx", printG_yd());
 
 #G_yd_table = printG_yd()
 #println("G_yd"); show(G_yd_table, allrows=true);

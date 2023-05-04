@@ -40,3 +40,11 @@ function J_uu(eps)
     end
     return J_uu
 end
+
+J_uu_matrix = J_uu(1e-2)';
+df = DataFrame(col1 = J_uu_matrix[1,:],
+                col2 = J_uu_matrix[2,:],
+                col3 = J_uu_matrix[3,:]);
+
+
+XLSX.writetable("data/Juu.xlsx", df);
