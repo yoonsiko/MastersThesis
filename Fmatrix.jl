@@ -3,7 +3,7 @@ include("gain_u.jl")
 include("J_uu.jl")
 include("J_ud.jl")
 include("nominal_case.jl")
-using LinearAlgebra
+using LinearAlgebra, XLSX
 
 eps = 1e-5
 nominal_values, nominal_J = nominal();
@@ -28,6 +28,6 @@ function print_F(matrix)
                      ∂y∂d_3 = matrix[:,3])
 end
 
-show(print_F(Fmatrix(nominal_values)), allrows=true)
-
-show(nullspace(Fmatrix(nominal_value)))
+#show(print_F(Fmatrix(nominal_values)), allrows=true)
+#show(nullspace(Fmatrix(nominal_value)))
+#XLSX.writetable("data/F.xlsx", print_F(Fmatrix(nominal_values)));
