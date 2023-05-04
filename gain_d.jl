@@ -246,7 +246,7 @@ function matrix_Gyd(nominal_values, eps)
     return matrix
 end
 
-XLSX.writetable("data/G_yd.xlsx", printG_yd());
+#XLSX.writetable("data/G_yd.xlsx", printG_yd());
 
 #G_yd_table = printG_yd()
 #println("G_yd"); show(G_yd_table, allrows=true);

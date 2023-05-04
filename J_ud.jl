@@ -33,10 +33,11 @@ function J_ud(eps)
     end
     return J_ud
 end
-J_ud_matrix = J_ud(1e-2)';
-df = DataFrame(col1 = J_ud_matrix[1,:],
+
+function J_ud_xlsx()
+    J_ud_matrix = J_ud(1e-2)';
+    df = DataFrame(col1 = J_ud_matrix[1,:],
                 col2 = J_ud_matrix[2,:],
                 col3 = J_ud_matrix[3,:]);
-
-
-XLSX.writetable("data/Jud.xlsx", df);
+    XLSX.writetable("data/Jud.xlsx", df);
+end
