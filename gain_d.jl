@@ -86,25 +86,27 @@ function G_yd(nominal, option, eps)
     preCond_model(m, par);
     Cond_model(m, par);
     PSA_model(m, par);
-
+    d1 = par.init.init_stream;
+    d2 = par.elCost;
+    d3 = par.P_H2;
     if option == 1
         delta_d = eps*par.init.init_stream;
-        par.init.init_stream = par.init.init_stream*(1+eps);
+        d1 = par.init.init_stream*(1+eps);
     elseif option == 2
         delta_d = eps*par.elCost;
-        par.elCost = par.elCost*(1+eps);
+        d2 = par.elCost*(1+eps);
     elseif option == 3
         delta_d = eps*par.P_H2;
-        par.P_H2 = par.P_H2*(1+eps);
+        d3 = par.P_H2*(1+eps);
     elseif option == -1
         delta_d = -eps*par.init.init_stream;
-        par.init.init_stream = par.init.init_stream*(1-eps);
+        d1 = par.init.init_stream*(1-eps);
     elseif option == -2
         delta_d = -eps*par.elCost;
-        par.elCost = par.elCost*(1-eps);
+        d2 = par.elCost*(1-eps);
     elseif option == -3
         delta_d = -eps*par.P_H2;
-        par.P_H2 = par.P_H2*(1+eps);
+        d3 = par.P_H2*(1+eps);
     else 
         print("Option not valid")
     end
@@ -164,7 +166,7 @@ function G_yd(nominal, option, eps)
 
     ######## New constraints for the economic objective function #############
     @NLconstraint(m, m[:F_H2] - m[:psa_outProduct_mol][3] + m[:F_H2_heat] == 0);
-    @NLconstraint(m, m[:F_NG] - par.init.init_stream + m[:F_NG_heat] == 0);
+    @NLconstraint(m, m[:F_NG] - d1 + m[:F_NG_heat] == 0);
     @NLconstraint(m, m[:F_fluegas] - m[:F_NG_heat] - 2*m[:F_NG_heat]/0.79 == 0);
     @NLconstraint(m, m[:F_inj] - m[:F_fluegas] - sum(value(m[:psa_outPurge_mol][i]) for i = 1:5) == 0);
     @NLconstraint(m, m[:prePR_Q] + m[:preGHR_Q] - m[:F_H2_heat]*par.HHV_H2*2.016 - sum(m[:F_NG_heat]*par.HHV_NG[i]*par.init.init_comp[i]*par.molarMass[i] for i = 1:10) == 0);
@@ -172,7 +174,7 @@ function G_yd(nominal, option, eps)
     compW1 = Wrev(m, m[:F_inj], 1, 10, m[:psa_outPurge_T], par);
     compW2 = Wrev(m, m[:F_inj],10,100,m[:psa_outPurge_T], par);
     compWsum = @NLexpression(m, compW1 + compW2);
-    @NLobjective(m, Max, m[:F_H2]*par.P_H2 - compWsum*par.elCost/1000);
+    @NLobjective(m, Max, m[:F_H2]*d3 - compWsum*d2/1000);
 
     optimize!(m)
 

@@ -55,6 +55,9 @@ function finite_diff_1(option, eps)
     PSA_model(m, par);
     h = 0;
     k = 0;
+    d1 = par.init.init_stream;
+    d2 = par.elCost;
+    d3 = par.P_H2;
     if option == 1 # u1 + h
         h = eps*79.29706225438805; 
         @NLconstraint(m, m[:nO2]-79.29706225438805+eps== 0);
@@ -72,19 +75,19 @@ function finite_diff_1(option, eps)
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818+eps== 0);
     elseif option == 4 # d1 + h
         k = eps*par.init.init_stream;
-        par.init.init_stream = par.init.init_stream+eps;
+        d1 = par.init.init_stream+eps;
         @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == 5 # d2 + h
         k = eps*par.elCost;
-        par.elCost = par.elCost+eps;
+        d2 = par.elCost+eps;
         @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == 6 # d3 + h
         k = eps*par.P_H2;
-        par.P_H2 = par.P_H2+eps;
+        d3 = par.P_H2+eps;
         @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
@@ -105,19 +108,19 @@ function finite_diff_1(option, eps)
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818-eps== 0);
     elseif option == -4 # d1 - h
         k = eps*par.init.init_stream;
-        par.init.init_stream = par.init.init_stream-eps;
+        d1 = par.init.init_stream-eps;
         @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == -5 # d2 - h
         k = eps*par.elCost;
-        par.elCost = par.elCost-eps;
+        d2 = par.elCost-eps;
         @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
     elseif option == -6 # d3 - h
         k = eps*par.P_H2;
-        par.P_H2 = par.P_H2-eps;
+        d3 = par.P_H2-eps;
         @NLconstraint(m, m[:nO2]-79.29706225438805 == 0);
         @NLconstraint(m, m[:pr_in_T]-644.5953165006283== 0);
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818 == 0);
@@ -177,7 +180,7 @@ function finite_diff_1(option, eps)
 
     ######## New constraints for the economic objective function #############
     @NLconstraint(m, m[:F_H2] - m[:psa_outProduct_mol][3] + m[:F_H2_heat] == 0);
-    @NLconstraint(m, m[:F_NG] - par.init.init_stream + m[:F_NG_heat] == 0);
+    @NLconstraint(m, m[:F_NG] - d1 + m[:F_NG_heat] == 0);
     @NLconstraint(m, m[:F_fluegas] - m[:F_NG_heat] - 2*m[:F_NG_heat]/0.79 == 0);
     @NLconstraint(m, m[:F_inj] - m[:F_fluegas] - sum(value(m[:psa_outPurge_mol][i]) for i = 1:5) == 0);
     @NLconstraint(m, m[:prePR_Q] + m[:preGHR_Q] - m[:F_H2_heat]*par.HHV_H2*2.016 - sum(m[:F_NG_heat]*par.HHV_NG[i]*par.init.init_comp[i]*par.molarMass[i] for i = 1:10) == 0);
@@ -185,7 +188,7 @@ function finite_diff_1(option, eps)
     compW1 = Wrev(m, m[:F_inj], 1, 10, m[:psa_outPurge_T], par);
     compW2 = Wrev(m, m[:F_inj],10,100,m[:psa_outPurge_T], par);
     compWsum = @NLexpression(m, compW1 + compW2);
-    @NLobjective(m, Max, m[:F_H2]*par.P_H2 - compWsum*par.elCost/1000);
+    @NLobjective(m, Max, m[:F_H2]*d3 - compWsum*d2/1000);
 
     optimize!(m)
     if termination_status(m) == LOCALLY_SOLVED || termination_status(m) == OPTIMAL || termination_status(m) == ALMOST_LOCALLY_SOLVED
@@ -216,6 +219,9 @@ function finite_diff_2(option_x, option_y, eps;m=0.)
     PSA_model(m, par);
     h = 0;
     k = 0;
+    d1 = par.init.init_stream;
+    d2 = par.elCost;
+    d3 = par.P_H2;
     
     if option_x == 1 # u1 + h
         h = eps*79.29706225438805; 
@@ -228,13 +234,13 @@ function finite_diff_2(option_x, option_y, eps;m=0.)
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818+eps== 0);
     elseif option_x == 4 # d1 + k
         h = eps*par.init.init_stream;
-        par.init.init_stream = par.init.init_stream+eps;
+        d1 = par.init.init_stream+eps;
     elseif option_x == 5 # d2 + k
         h = eps*par.elCost;
-        par.elCost = par.elCost+eps;
+        d2 = par.elCost+eps;
     elseif option_x == 6 # d3 + k
         h = eps*par.P_H2;
-        par.P_H2 = par.P_H2+eps;
+        d3 = par.P_H2+eps;
     elseif option_x == -1 # u1 - h
         h = eps*79.29706225438805;
         @NLconstraint(m, m[:nO2]-79.29706225438805-eps== 0);
@@ -246,13 +252,13 @@ function finite_diff_2(option_x, option_y, eps;m=0.)
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818-eps== 0);
     elseif option_x == -4 # d1 - k
         h = eps*par.init.init_stream;
-        par.init.init_stream = par.init.init_stream-eps;
+        d1 = par.init.init_stream-eps;
     elseif option_x == -5 # d2 - k
         h = eps*par.elCost;
-        par.elCost = par.elCost-eps;
+        d2 = par.elCost-eps;
     elseif option_x == -6 # d3 - k
         h = eps*par.P_H2;
-        par.P_H2 = par.P_H2-eps;
+        d3 = par.P_H2-eps;
     else 
         print("Option not valid")
     end
@@ -268,13 +274,13 @@ function finite_diff_2(option_x, option_y, eps;m=0.)
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818+eps== 0);
     elseif option_y == 4 # d1 + k
         k = eps*par.init.init_stream;
-        par.init.init_stream = par.init.init_stream+eps;
+        d1 = par.init.init_stream+eps;
     elseif option_y == 5 # d2 + k
         k = eps*par.elCost;
-        par.elCost = par.elCost+eps;
+        d2 = par.elCost+eps;
     elseif option_y == 6 # d3 + k
         k = eps*par.P_H2;
-        par.P_H2 = par.P_H2+eps;
+        d3 = par.P_H2+eps;
     elseif option_y == -1 # u1 - h
         k = eps*79.29706225438805;
         @NLconstraint(m, m[:nO2]-79.29706225438805-eps== 0);
@@ -286,13 +292,13 @@ function finite_diff_2(option_x, option_y, eps;m=0.)
         @NLconstraint(m, m[:atr_out_T]-1291.817465833818-eps== 0);
     elseif option_y == -4 # d1 - k
         k = eps*par.init.init_stream;
-        par.init.init_stream = par.init.init_stream-eps;
+        d1 = par.init.init_stream-eps;
     elseif option_y == -5 # d2 - k
         k = eps*par.elCost;
-        par.elCost = par.elCost-eps;
+        d2 = par.elCost-eps;
     elseif option_y == -6 # d3 - k
         k = eps*par.P_H2;
-        par.P_H2 = par.P_H2-eps;
+        d3 = par.P_H2-eps;
     else 
         print("Option not valid")
     end
@@ -358,7 +364,7 @@ function finite_diff_2(option_x, option_y, eps;m=0.)
 
     ######## New constraints for the economic objective function #############
     @NLconstraint(m, m[:F_H2] - m[:psa_outProduct_mol][3] + m[:F_H2_heat] == 0);
-    @NLconstraint(m, m[:F_NG] - par.init.init_stream + m[:F_NG_heat] == 0);
+    @NLconstraint(m, m[:F_NG] - d1 + m[:F_NG_heat] == 0);
     @NLconstraint(m, m[:F_fluegas] - m[:F_NG_heat] - 2*m[:F_NG_heat]/0.79 == 0);
     @NLconstraint(m, m[:F_inj] - m[:F_fluegas] - sum(value(m[:psa_outPurge_mol][i]) for i = 1:5) == 0);
     @NLconstraint(m, m[:prePR_Q] + m[:preGHR_Q] - m[:F_H2_heat]*par.HHV_H2*2.016 - sum(m[:F_NG_heat]*par.HHV_NG[i]*par.init.init_comp[i]*par.molarMass[i] for i = 1:10) == 0);
@@ -366,7 +372,7 @@ function finite_diff_2(option_x, option_y, eps;m=0.)
     compW1 = Wrev(m, m[:F_inj], 1, 10, m[:psa_outPurge_T], par);
     compW2 = Wrev(m, m[:F_inj],10,100,m[:psa_outPurge_T], par);
     compWsum = @NLexpression(m, compW1 + compW2);
-    @NLobjective(m, Max, m[:F_H2]*par.P_H2 - compWsum*par.elCost/1000);
+    @NLobjective(m, Max, m[:F_H2]*d3 - compWsum*d2/1000);
 
     optimize!(m)
     

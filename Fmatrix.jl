@@ -30,4 +30,4 @@ end
 
 #show(print_F(Fmatrix(nominal_values)), allrows=true)
 #show(nullspace(Fmatrix(nominal_value)))
-#XLSX.writetable("data/F.xlsx", print_F(Fmatrix(nominal_values)));
+XLSX.writetable("data/F.xlsx", print_F(Fmatrix(nominal_values)));
