@@ -20,21 +20,21 @@ function diagWn(nom)
     comp_pert = 0.01; # absolute [-]
     for i in eachindex(nom)
         if 1<=i<=126
-            nom[i] = nom[i]*(1+flow_pert);
+            nom[i] = nom[i]*flow_pert;
         elseif 127<=i<=131
-            nom[i] += comp_pert;
+            nom[i] = comp_pert;
         elseif i == 132
-            nom[i] = nom[i]*(1+flow_pert);
+            nom[i] = nom[i]*flow_pert;
         elseif 133<=i<=137
-            nom[i] += comp_pert;
+            nom[i] = comp_pert;
         elseif 138<=i<=152
-            nom[i] = nom[i]*(1+flow_pert);
+            nom[i] = nom[i]*flow_pert;
         elseif 153<=i<=171
-            nom[i] += temp_pert;
+            nom[i] = temp_pert;
         elseif 172<=i<=177
-            nom[i] = nom[i]*(1+Q_pert);
+            nom[i] = nom[i]*Q_pert;
         else
-            nom[i] = nom[i]*(1+flow_pert);
+            nom[i] = nom[i]*flow_pert;
         end
     end
     df = DataFrame(diagm(nom),:auto);
@@ -44,7 +44,7 @@ end
 function diagWd()
     d= [145.4, 0.14, 3.347]
     for i in eachindex(d)
-        d[i] = d[i]*(1+0.1)
+        d[i] = d[i]*0.1
     end
     return DataFrame(diagm(d),:auto)
 end
