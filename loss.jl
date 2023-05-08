@@ -1,6 +1,6 @@
 include("nominal_case.jl")
 include("test.jl")
-
+using LinearAlgebra
 variable_name = [
     "mix_in_mol[1]", "mix_in_mol[2]", "mix_in_mol[3]", "mix_in_mol[4]", "mix_in_mol[5]",
     "mix_in_mol[6]", "mix_in_mol[7]", "mix_in_mol[8]", "mix_in_mol[9]", "mix_in_mol[10]",
@@ -61,24 +61,24 @@ function Loss()
 
     # Disturb your disturbances here
     eps = 0.1
-    #d1 = par.init.init_stream;
-    #d2 = par.elCost;
-    #d3 = par.P_H2;
-    d1 = par.init.init_stream*(1+eps); # +d1
-    d2 = par.elCost*(1+eps); # +d2
-    d3 = par.P_H2*(1+eps); # +d3
+    d1 = par.init.init_stream;
+    d2 = par.elCost;
+    d3 = par.P_H2;
+    #d1 = par.init.init_stream*(1+eps); # +d1
+    #d2 = par.elCost*(1+eps); # +d2
+    #d3 = par.P_H2*(1+eps); # +d3
     #d1 = par.init.init_stream*(1-eps); # -d1
     #d2 = par.elCost*(1-eps); # -d2
     #d3 = par.P_H2*(1-eps); # -d3
 
     # Choose your H matrix
     # H1 # 53, 148, 157
-    @NLconstraint(m, m[:pr_out_mol][3] - y_nom[53] == 0);
-    @NLconstraint(m, m[:psa_outPurge_mol][1] - y_nom[148] == 0);
-    @NLconstraint(m, m[:prePR_out_T] - y_nom[157] == 0);
+    #@NLconstraint(m, m[:pr_out_mol][3] - y_nom[53] == 0);
+    #@NLconstraint(m, m[:psa_outPurge_mol][1] - y_nom[148] == 0);
+    #@NLconstraint(m, m[:prePR_out_T] - y_nom[157] == 0);
     
     # H2 # 63, 148, 157
-    #@NLconstraint(m, m[:preGHR_in_mol][3] - y_nom[63] == 0);
+    #@NLconstraint(m, m[:preGHR_out_mol][3] - y_nom[68] == 0);
     #@NLconstraint(m, m[:psa_outPurge_mol][1] - y_nom[148] == 0);
     #@NLconstraint(m, m[:prePR_out_T] - y_nom[157] == 0);
 
@@ -157,7 +157,9 @@ function Loss()
     @NLconstraint(m, m[:itsr_out_T] == 473.0);
     @NLconstraint(m, m[:preCond_out_T] == 293.0);
     @NLconstraint(m, m[:postATR_out_T] == 643.2);
-
+    #@NLconstraint(m, m[:nO2] == 79.29706225438805);
+    #@NLconstraint(m, m[:pr_in_T] == 644.5953165006283);
+    #@NLconstraint(m, m[:atr_out_T] == 1291.817465833818);
 
     # Optimize
     optimize!(m)
@@ -166,13 +168,27 @@ function Loss()
     L = objective_value(m) - J_nom;
     println("The new objective value is: ", objective_value(m));
     println("While the nominal objective value is: ", J_nom);
-    streamdf, otherdf, massdf, compositiondf = printTable(m);
-    println("Stream table"); show(streamdf, allrows=true);
-    println("\n\nOther variables"); show(otherdf, allrows=true);
-    println("\n\nMass table"); show(massdf, allrows=true);
-    println("\n\nCompostion table"); show(compositiondf, allrows=true);
-    println("");
+    #streamdf, otherdf, massdf, compositiondf = printTable(m);
+    #println("Stream table"); show(streamdf, allrows=true);
+    #println("\n\nOther variables"); show(otherdf, allrows=true);
+    #println("\n\nMass table"); show(massdf, allrows=true);
+    #println("\n\nCompostion table"); show(compositiondf, allrows=true);
+    #println("");
     return L
 end
 
-@show(Loss())
+#@show(Loss())
+function nullspacePrint(data)
+    df = DataFrame(XLSX.readtable(data, "Sheet1"));
+    A = Matrix(df);
+    A = A[:, end-2:end];
+    A = A[[53, 148, 157], :];
+    F = convert(Matrix{Float64}, A);
+    return nullspace(F, rtol = 1);
+end
+#@show(nullspacePrint("data/F.xlsx"));
+
+
+[-0.010396358480702392 -0.9990843821558919 -0.041500759782440846;
+ -0.9999454720656192 0.010428244690954458 -0.0005519131554076154;
+  0.0009841878917459415 0.041492758944720855 -0.9991383199183929]
