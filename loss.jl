@@ -42,7 +42,7 @@ y_nom, J_nom = nominal();
 function Loss()
     par = _par();
     optimizer = optimizer_with_attributes(Ipopt.Optimizer,
-             "tol" => 1e-10, "constr_viol_tol" => 1e-10,
+             "tol" => 1e-6, "constr_viol_tol" => 1e-8,
              "print_level" => 0)
     m = Model(optimizer);
 
@@ -58,6 +58,16 @@ function Loss()
     preCond_model(m, par);
     Cond_model(m, par);
     PSA_model(m, par);
+
+    # Constraints for setting the active constraints to their boundary value
+    @NLconstraint(m, m[:SC_ratio] - 5.0 == 0);
+    @NLconstraint(m, m[:pr_out_T] - 609.2 == 0);
+    @NLconstraint(m, m[:itsr_out_T] - 473.0  == 0);
+    @NLconstraint(m, m[:preCond_out_T] - 293.0 == 0);
+    @NLconstraint(m, m[:postATR_out_T] - 643.2 == 0);
+    @NLconstraint(m, m[:nO2] - 79.29706225438805 == 0);
+    @NLconstraint(m, m[:pr_in_T] - 644.5953165006283 == 0);
+    @NLconstraint(m, m[:atr_out_T] - 1291.817465833818 == 0);
 
     # Disturb your disturbances here
     eps = 0.1
@@ -83,9 +93,12 @@ function Loss()
     #@NLconstraint(m, m[:prePR_out_T] - y_nom[157] == 0);
 
     # H3 
-    # @NLconstraint
-    # @NLconstraint
-    # @NLconstraint
+    H3 = [-0.010396358480702392 -0.9990843821558919 -0.041500759782440846;
+    -0.9999454720656192 0.010428244690954458 -0.0005519131554076154;
+     0.0009841878917459415 0.041492758944720855 -0.9991383199183929];
+    #@NLconstraint(m, H3[1,1]*(m[:pr_out_mol][3] - y_nom[53]) + H3[1,2]*(m[:psa_outPurge_mol][1] - y_nom[148]) + H3[1,3]*(m[:prePR_out_T] - y_nom[157]) == 0);
+    #@NLconstraint(m, H3[2,1]*(m[:pr_out_mol][3] - y_nom[53]) + H3[2,2]*(m[:psa_outPurge_mol][1] - y_nom[148]) + H3[2,3]*(m[:prePR_out_T] - y_nom[157]) == 0);
+    #@NLconstraint(m, H3[3,1]*(m[:pr_out_mol][3] - y_nom[53]) + H3[3,2]*(m[:psa_outPurge_mol][1] - y_nom[148]) + H3[3,3]*(m[:prePR_out_T] - y_nom[157]) == 0);
 
     @variable(m, 0 <= F_H2, start = 500); # H2 product that is being sold in the obj function
     @variable(m, 0 <= F_H2_heat, start = 1); # H2 from the product stream that is being used to heat up the process
@@ -151,16 +164,6 @@ function Loss()
     compWsum = @NLexpression(m, compW1 + compW2);
     @NLobjective(m, Max, m[:F_H2]*d3 - compWsum*d2/1000);
 
-    # Constraints for setting the active constraints to their boundary value
-    @NLconstraint(m, m[:SC_ratio] == 5.0);
-    @NLconstraint(m, m[:pr_out_T] == 609.2);
-    @NLconstraint(m, m[:itsr_out_T] == 473.0);
-    @NLconstraint(m, m[:preCond_out_T] == 293.0);
-    @NLconstraint(m, m[:postATR_out_T] == 643.2);
-    #@NLconstraint(m, m[:nO2] == 79.29706225438805);
-    #@NLconstraint(m, m[:pr_in_T] == 644.5953165006283);
-    #@NLconstraint(m, m[:atr_out_T] == 1291.817465833818);
-
     # Optimize
     optimize!(m)
 
@@ -174,21 +177,20 @@ function Loss()
     #println("\n\nMass table"); show(massdf, allrows=true);
     #println("\n\nCompostion table"); show(compositiondf, allrows=true);
     #println("");
-    return L
+    if termination_status(m) == LOCALLY_SOLVED || termination_status(m) == OPTIMAL || termination_status(m) == ALMOST_LOCALLY_SOLVED
+        return L
+    else
+        return Inf      
+    end
 end
 
-#@show(Loss())
+@show(Loss())
 function nullspacePrint(data)
     df = DataFrame(XLSX.readtable(data, "Sheet1"));
     A = Matrix(df);
     A = A[:, end-2:end];
-    A = A[[53, 148, 157], :];
+    A = A[[53,68, 148, 157], :];
     F = convert(Matrix{Float64}, A);
-    return nullspace(F, rtol = 1);
+    return nullspace(F, rtol=1);
 end
 #@show(nullspacePrint("data/F.xlsx"));
-
-
-[-0.010396358480702392 -0.9990843821558919 -0.041500759782440846;
- -0.9999454720656192 0.010428244690954458 -0.0005519131554076154;
-  0.0009841878917459415 0.041492758944720855 -0.9991383199183929]
