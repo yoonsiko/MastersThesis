@@ -5,8 +5,8 @@ function Cond_model(model, par)
   @variable(model, 0 <= cond_in_mol[1:5]); # Stream 11
   #@variable(model, 0 <= cond_outPurge_mol[1:5]); # Stream 13 (H2O stream)
   #@variable(model, 0 <= cond_outProduct_mol[1:5]); # Stream 12 (PSA)
-  @variable(model, 0 <= cond_liq_frac[1:5]);  # Outlet liquid phase fractions
-  @variable(model, 0 <= cond_vap_frac[1:5]);
+  @variable(model, 0 <= cond_liq_frac[1:5]<=1);  # Outlet liquid phase fractions
+  @variable(model, 0 <= cond_vap_frac[1:5]<=1);
   @variable(model, 0 <= cond_L, start = 141);
   @variable(model, 0 <= cond_V, start = 923);
 
