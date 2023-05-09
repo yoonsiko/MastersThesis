@@ -50,12 +50,14 @@ eps = 0.1
 
 # return_list should be either d1, d2 or d3,
 function nominal()
-    par = _par();
+    __par = _par();
     optimizer = optimizer_with_attributes(Ipopt.Optimizer,
-             "tol" => 1e-8, "constr_viol_tol" => 1e-8,
+             "tol" => 1e-9, "constr_viol_tol" => 1e-5,
              "print_level" => 0)
     m = Model(optimizer);
-
+    d1 = par.init.init_stream;
+    d2 = par.elCost;
+    d3 = par.P_H2;
     ###### Assembling the submodels to a larger model #######
     MIX_model(m, par);
     prePR_model(m, par);
@@ -121,7 +123,7 @@ function nominal()
 
     ######## New constraints for the economic objective function #############
     @NLconstraint(m, m[:F_H2] - m[:psa_outProduct_mol][3] + m[:F_H2_heat] == 0);
-    @NLconstraint(m, m[:F_NG] - par.init.init_stream + m[:F_NG_heat] == 0);
+    @NLconstraint(m, m[:F_NG] - d1 + m[:F_NG_heat] == 0);
     @NLconstraint(m, m[:F_fluegas] - m[:F_NG_heat] - 2*m[:F_NG_heat]/0.79 == 0);
     @NLconstraint(m, m[:F_inj] - m[:F_fluegas] - sum(value(m[:psa_outPurge_mol][i]) for i = 1:5) == 0);
     @NLconstraint(m, m[:prePR_Q] + m[:preGHR_Q] - m[:F_H2_heat]*par.HHV_H2*2.016 - sum(m[:F_NG_heat]*par.HHV_NG[i]*par.init.init_comp[i]*par.molarMass[i] for i = 1:10) == 0);
@@ -131,8 +133,7 @@ function nominal()
     T2 = compT(m, m[:psa_outPurge_T],1,10);
     compW2 = Wrev(m, m[:F_inj],10,100,m[:psa_outPurge_T], par);
     compWsum = @NLexpression(m, compW1 + compW2);
-    @NLobjective(m, Max, m[:F_H2]*par.P_H2 - compWsum*par.elCost/1000); # 44*m[:F_inj]/1000*par.P_inj
-    #@NLobjective(m, Max, m[:psa_outProduct_mol][3])
+    @NLobjective(m, Max, m[:F_H2]*d3 - compWsum*d2/1000);
     optimize!(m)
     nominal_J = objective_value(m)
 
@@ -174,4 +175,196 @@ function nominal()
         value(m[:H2Ostream]), value(m[:F_H2]), value(m[:F_H2_heat]), value(m[:F_NG]), value(m[:F_NG_heat]), value(m[:F_fluegas]), value(m[:F_inj])
     ]
     return nominal_values, nominal_J
+end
+
+function optJ_func()
+    __par = _par();
+    optimizer = optimizer_with_attributes(Ipopt.Optimizer,
+             "tol" => 1e-9, "constr_viol_tol" => 1e-5,
+             "print_level" => 0)
+    m = Model(optimizer);
+    
+    eps = 0.1
+
+    par = deepcopy(__par)
+    #par.init.init_stream  = par.init.init_stream +5; # +d1
+    par.elCost = par.elCost*(1+eps); # +d2
+    #par.P_H2 = par.P_H2*(1+eps); # +d3
+    par.init.init_stream  = par.init.init_stream -5; # -d1
+    #par.elCost = par.elCost*(1-eps); # -d2
+    par.P_H2 = par.P_H2*(1-eps); # -d3
+
+
+    d1 = par.init.init_stream;
+    d2 = par.elCost;
+    d3 = par.P_H2;
+    ###### Assembling the submodels to a larger model #######
+    MIX_model(m, par);
+    prePR_model(m, par);
+    PR_model(m, par);
+    preGHR_model(m, par);
+    GHR_model(m, par);
+    ATR_model(m, par);
+    postATR_model(m, par);
+    ITSR_model(m, par);
+    preCond_model(m, par);
+    Cond_model(m, par);
+    PSA_model(m, par);
+
+    @variable(m, 0 <= F_H2, start = 500); # H2 product that is being sold in the obj function
+    @variable(m, 0 <= F_H2_heat, start = 1); # H2 from the product stream that is being used to heat up the process
+    @variable(m, 0 <= F_NG_heat, start = 1); # NG from the initial stream that is being used to heat up the process
+    @variable(m, 0 <= F_NG, start = 150); # NG from the initial stream that is being used in the process
+    @variable(m, 0 <= F_fluegas, start = 1); # CO2 gas that generates from combusting natural gas which needs to be injected
+    @variable(m, 0 <= F_inj, start = 200); # CO2 and other component gases that is being injected
+
+    ##################### Connection constraints #######################
+    for i = 1:10
+        @NLconstraint(m, m[:mix_out_mol][i] - m[:prePR_in_mol][i] == 0)
+        @NLconstraint(m, m[:prePR_out_mol][i] - m[:pr_in_mol][i] == 0)
+    end
+
+    for i = 1:5 # After all heavier carbons are removed
+        @NLconstraint(m, m[:pr_out_mol][i] - m[:preGHR_in_mol][i] == 0)
+        @NLconstraint(m, m[:preGHR_out_mol][i] - m[:ghr_in_mol][i] == 0)
+        @NLconstraint(m, m[:ghr_out_mol][i] - m[:atr_in_mol][i] == 0)
+        @NLconstraint(m, m[:atr_out_mol][i] - m[:postATR_in_mol][i] == 0)
+        @NLconstraint(m, m[:postATR_out_mol][i] - m[:itsr_in_mol][i] == 0)
+        @NLconstraint(m, m[:itsr_out_mol][i] - m[:preCond_in_mol][i] == 0)
+        @NLconstraint(m, m[:preCond_out_mol][i] - m[:cond_in_mol][i] == 0)
+        @NLconstraint(m, m[:cond_vap_frac][i]*m[:cond_V] - m[:psa_in_mol][i] == 0)
+    end
+    ################# Same for the temperature ##################################
+    @NLconstraint(m, m[:mix_out_T] - m[:prePR_in_T] == 0);
+    @NLconstraint(m, m[:prePR_out_T] - m[:pr_in_T] == 0);
+    @NLconstraint(m, m[:pr_out_T] - m[:preGHR_in_T] == 0);
+    @NLconstraint(m, m[:preGHR_out_T] - m[:ghr_in_T] == 0);
+    @NLconstraint(m, m[:ghr_out_T] - m[:atr_in_T] == 0);
+    @NLconstraint(m, m[:atr_out_T] - m[:postATR_in_T] == 0);
+    @NLconstraint(m, m[:postATR_out_T] - m[:itsr_in_T] == 0);
+    @NLconstraint(m, m[:itsr_out_T] - m[:preCond_in_T] == 0);
+    @NLconstraint(m, m[:preCond_out_T] - m[:cond_in_T] == 0);
+    @NLconstraint(m, m[:cond_V_T] - m[:psa_in_T] == 0);
+
+
+    ############## Initial values ##########################################
+    for i = 1:10
+        @NLconstraint(m, par.init.init_comp[i]*m[:F_NG] - m[:mix_in_mol][i] == 0);
+    end
+    @NLconstraint(m, par.mix.in_T - m[:mix_in_T] == 0);
+    @NLconstraint(m, par.mix.H2O_T - m[:H2O_T] == 0);
+
+    ############# To ensure the GHR and ATR heat exchange ###################
+    @NLconstraint(m, m[:ghr_Q] + m[:postATR_Q] == 0); #- additional_Q == 0);
+
+    ##To ensure that the inlet hot stream is hotter than outlet cold stream##
+    @NLconstraint(m, m[:atr_out_T] - m[:ghr_out_T] >= 25);
+    @NLconstraint(m, m[:postATR_out_T] - m[:ghr_in_T] >= 25);
+
+    ######## New constraints for the economic objective function #############
+    @NLconstraint(m, m[:F_H2] - m[:psa_outProduct_mol][3] + m[:F_H2_heat] == 0);
+    @NLconstraint(m, m[:F_NG] - d1 + m[:F_NG_heat] == 0);
+    @NLconstraint(m, m[:F_fluegas] - m[:F_NG_heat] - 2*m[:F_NG_heat]/0.79 == 0);
+    @NLconstraint(m, m[:F_inj] - m[:F_fluegas] - sum(value(m[:psa_outPurge_mol][i]) for i = 1:5) == 0);
+    @NLconstraint(m, m[:prePR_Q] + m[:preGHR_Q] - m[:F_H2_heat]*par.HHV_H2*2.016 - sum(m[:F_NG_heat]*par.HHV_NG[i]*par.init.init_comp[i]*par.molarMass[i] for i = 1:10) == 0);
+
+
+    compW1 = Wrev(m, m[:F_inj], 1, 10, m[:psa_outPurge_T], par);
+    T2 = compT(m, m[:psa_outPurge_T],1,10);
+    compW2 = Wrev(m, m[:F_inj],10,100,m[:psa_outPurge_T], par);
+    compWsum = @NLexpression(m, compW1 + compW2);
+    @NLobjective(m, Max, m[:F_H2]*d3 - compWsum*d2/1000);
+    optimize!(m)
+    opt_J = objective_value(m)
+    return opt_J
+end
+
+function warm_nominal()
+    par = _par();
+    optimizer = optimizer_with_attributes(Ipopt.Optimizer,
+             "tol" => 1e-9, "constr_viol_tol" => 1e-9,
+             "print_level" => 0)
+    m = Model(optimizer);
+
+    ###### Assembling the submodels to a larger model #######
+    MIX_model(m, par);
+    prePR_model(m, par);
+    PR_model(m, par);
+    preGHR_model(m, par);
+    GHR_model(m, par);
+    ATR_model(m, par);
+    postATR_model(m, par);
+    ITSR_model(m, par);
+    preCond_model(m, par);
+    Cond_model(m, par);
+    PSA_model(m, par);
+
+    @variable(m, 0 <= F_H2, start = 500); # H2 product that is being sold in the obj function
+    @variable(m, 0 <= F_H2_heat, start = 1); # H2 from the product stream that is being used to heat up the process
+    @variable(m, 0 <= F_NG_heat, start = 1); # NG from the initial stream that is being used to heat up the process
+    @variable(m, 0 <= F_NG, start = 150); # NG from the initial stream that is being used in the process
+    @variable(m, 0 <= F_fluegas, start = 1); # CO2 gas that generates from combusting natural gas which needs to be injected
+    @variable(m, 0 <= F_inj, start = 200); # CO2 and other component gases that is being injected
+
+    ##################### Connection constraints #######################
+    for i = 1:10
+        @NLconstraint(m, m[:mix_out_mol][i] - m[:prePR_in_mol][i] == 0)
+        @NLconstraint(m, m[:prePR_out_mol][i] - m[:pr_in_mol][i] == 0)
+    end
+
+    for i = 1:5 # After all heavier carbons are removed
+        @NLconstraint(m, m[:pr_out_mol][i] - m[:preGHR_in_mol][i] == 0)
+        @NLconstraint(m, m[:preGHR_out_mol][i] - m[:ghr_in_mol][i] == 0)
+        @NLconstraint(m, m[:ghr_out_mol][i] - m[:atr_in_mol][i] == 0)
+        @NLconstraint(m, m[:atr_out_mol][i] - m[:postATR_in_mol][i] == 0)
+        @NLconstraint(m, m[:postATR_out_mol][i] - m[:itsr_in_mol][i] == 0)
+        @NLconstraint(m, m[:itsr_out_mol][i] - m[:preCond_in_mol][i] == 0)
+        @NLconstraint(m, m[:preCond_out_mol][i] - m[:cond_in_mol][i] == 0)
+        @NLconstraint(m, m[:cond_vap_frac][i]*m[:cond_V] - m[:psa_in_mol][i] == 0)
+    end
+
+    ################# Same for the temperature ##################################
+    @NLconstraint(m, m[:mix_out_T] - m[:prePR_in_T] == 0);
+    @NLconstraint(m, m[:prePR_out_T] - m[:pr_in_T] == 0);
+    @NLconstraint(m, m[:pr_out_T] - m[:preGHR_in_T] == 0);
+    @NLconstraint(m, m[:preGHR_out_T] - m[:ghr_in_T] == 0);
+    @NLconstraint(m, m[:ghr_out_T] - m[:atr_in_T] == 0);
+    @NLconstraint(m, m[:atr_out_T] - m[:postATR_in_T] == 0);
+    @NLconstraint(m, m[:postATR_out_T] - m[:itsr_in_T] == 0);
+    @NLconstraint(m, m[:itsr_out_T] - m[:preCond_in_T] == 0);
+    @NLconstraint(m, m[:preCond_out_T] - m[:cond_in_T] == 0);
+    @NLconstraint(m, m[:cond_V_T] - m[:psa_in_T] == 0);
+
+
+    ############## Initial values ##########################################
+    for i = 1:10
+        @NLconstraint(m, par.init.init_comp[i]*m[:F_NG] - m[:mix_in_mol][i] == 0);
+    end
+    @NLconstraint(m, par.mix.in_T - m[:mix_in_T] == 0);
+    @NLconstraint(m, par.mix.H2O_T - m[:H2O_T] == 0);
+
+    ############# To ensure the GHR and ATR heat exchange ###################
+    @NLconstraint(m, m[:ghr_Q] + m[:postATR_Q] == 0); #- additional_Q == 0);
+
+    ##To ensure that the inlet hot stream is hotter than outlet cold stream##
+    @NLconstraint(m, m[:atr_out_T] - m[:ghr_out_T] >= 25);
+    @NLconstraint(m, m[:postATR_out_T] - m[:ghr_in_T] >= 25);
+
+    ######## New constraints for the economic objective function #############
+    @NLconstraint(m, m[:F_H2] - m[:psa_outProduct_mol][3] + m[:F_H2_heat] == 0);
+    @NLconstraint(m, m[:F_NG] - par.init.init_stream + m[:F_NG_heat] == 0);
+    @NLconstraint(m, m[:F_fluegas] - m[:F_NG_heat] - 2*m[:F_NG_heat]/0.79 == 0);
+    @NLconstraint(m, m[:F_inj] - m[:F_fluegas] - sum(value(m[:psa_outPurge_mol][i]) for i = 1:5) == 0);
+    @NLconstraint(m, m[:prePR_Q] + m[:preGHR_Q] - m[:F_H2_heat]*par.HHV_H2*2.016 - sum(m[:F_NG_heat]*par.HHV_NG[i]*par.init.init_comp[i]*par.molarMass[i] for i = 1:10) == 0);
+
+
+    compW1 = Wrev(m, m[:F_inj], 1, 10, m[:psa_outPurge_T], par);
+    T2 = compT(m, m[:psa_outPurge_T],1,10);
+    compW2 = Wrev(m, m[:F_inj],10,100,m[:psa_outPurge_T], par);
+    compWsum = @NLexpression(m, compW1 + compW2);
+    @NLobjective(m, Max, m[:F_H2]*par.P_H2 - compWsum*par.elCost/1000); # 44*m[:F_inj]/1000*par.P_inj
+    #@NLobjective(m, Max, m[:psa_outProduct_mol][3])
+    optimize!(m)
+    variable_primal = Dict(x => value(x) for x in all_variables(m))
+    return variable_primal
 end
