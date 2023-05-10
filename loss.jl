@@ -103,7 +103,7 @@ function Loss()
 
     # H3 Good Engineering Decision
     #@constraint(m, m[:ghr_out_T] - y_nom[161] == 0);
-    #@constraint(m, m[:itsr_out_mol][5] - y_nom[110] == 0);
+    #@constraint(m, m[:itsr_in_mol][5] - y_nom[105] == 0);
     #@constraint(m, m[:pr_out_mol][1] - y_nom[51] == 0);
 
 
